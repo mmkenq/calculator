@@ -1,5 +1,6 @@
 export default function Renderer(props){
 	this.state = {
+		server: props.server,
 		calc: props.calc,	
 
 		itemId: 0
@@ -25,26 +26,39 @@ export default function Renderer(props){
 			});
 
 			const category = document.createElement('select');
-			this.state.calc.state.config.categories.forEach((el, i)=>{
-				const categoryOption = document.createElement('option');
-				categoryOption.innerHTML = this.state.calc.state.config.categoryNames[i];
-	
-				categoryOption.addEventListener('click', ()=>{
-					product.innerHTML = '';
-					console.log(el);
-					el.products.forEach((el2, j)=>{
-						const productOption = document.createElement('option');
-						productOption.innerHTML = el2.name;
-						productOption.addEventListener('click', ()=>{
-							measure.innerHTML = this.state.calc.state.config.measureNames[el2.measure];
-						});
-	
-						product.appendChild(productOption);
+			category.addEventListener('focus', async ()=>{
+				category.innerHTML = '';
+				let img = document.createElement('img');
+				img.src = "assets/load2.gif";
+				//img.width = "200";
+				img.height = "100";
+				item.appendChild(img);
+
+				let res = await this.state.server.sendReq('getMaterials');
+				img.remove();
+
+				// HERE WE ARE CREATING OPTIONS...
+				res.data.forEach((el,i)=>{
+					const categoryOption = document.createElement('option');
+					categoryOption.innerHTML = el.material_name;	
+					categoryOption.addEventListener('click', ()=>{
+						product.innerHTML = '';
+						console.log(el);
+						//el.products.forEach((el2, j)=>{
+						//	const productOption = document.createElement('option');
+						//	productOption.innerHTML = el2.name;
+						//	productOption.addEventListener('click', ()=>{
+						//		measure.innerHTML = this.state.calc.state.config.measureNames[el2.measure];
+						//	});
+		
+						//	product.appendChild(productOption);
+						//});
 					});
-				});
-	
-				category.appendChild(categoryOption);
+		
+					category.appendChild(categoryOption);
+					});
 			});
+
 			const product = document.createElement('select');
 			// ...
 	
