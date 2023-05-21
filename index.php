@@ -45,6 +45,7 @@ else if ($path["extension"] == "gif") {
 }
 else {
 	if (preg_match('/api/', $_SERVER["REQUEST_URI"])){
+		header("Content-Type: application/json");
 		echo(json_encode(answer(router($_GET))));
 	} 
 	else{
