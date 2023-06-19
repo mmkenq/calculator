@@ -1,4 +1,6 @@
 export default function Server(props){
+	const config = props.config;
+	const { serverURL, } = config.serverConfig;
 	this.state = {};
 
 	function reqListener(req, resolve, reject){
@@ -8,7 +10,7 @@ export default function Server(props){
 	// Send AJAX Request to server
 	this.sendReq = function sendReq(method){
 		return new Promise((resolve, reject) => {
-			const url = "http://127.0.0.1:3000/api/?method=" + method;
+			const url = serverURL + method;
 			let req = new XMLHttpRequest();
 			req.addEventListener('load', reqListener.bind(null, req, resolve, reject));
 			req.open('GET', url, true);

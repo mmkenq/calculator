@@ -1,10 +1,10 @@
 export default function RdCalcConfig(){
-	const categoryNames = ['Техническое серебро', 'Конденсаторы', 'Лампы'];
-	const measureNames = ['гр', 'кг', 'шт'];
-	const priceEndings = ['руб.', '$'];
+	const serverConfig = {
+			serverURL: "http://127.0.0.1:3000/api/?method=", 	
+	};
 
+	const rendererConfig = {};
 
-	this.categoryNames = categoryNames;
-	this.measureNames = measureNames;
-	this.priceEndings = priceEndings;
+	this.serverConfig = serverConfig;
+	this.rendererConfig = rendererConfig;
 }

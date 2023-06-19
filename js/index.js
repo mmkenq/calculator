@@ -5,12 +5,14 @@ import Calculator from './modules/Calculator.js';
 import Renderer from './modules/Renderer.js';
 
 document.addEventListener('DOMContentLoaded', ()=>{
+	let config = new Config();
+	
 	let server = new Server({
-
+		config: config,
 	});
 
 	let calc = new Calculator({
-		config: new Config()
+		config: config,
 	});
 
 	let renderer = new Renderer({
