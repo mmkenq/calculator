@@ -12,8 +12,14 @@ class Application {
 	public function getStore($params){
 		return 'getStore';
 	}
+	public function getCategories($params){
+		return $this->db->getCategories();
+	}
 	public function getMaterials($params){
-		return $this->db->getMaterials();
+		return $this->db->getMaterials($params['categoryId']);
+	}
+	public function getUnit($params){
+		return $this->db->getUnit($params['unitId']);
 	}
 }
 

@@ -34,29 +34,38 @@ export default function Renderer(props){
 				img.height = "100";
 				item.appendChild(img);
 
-				let res = await this.state.server.sendReq('getMaterials');
+				let res = await this.state.server.sendReq('getCategories');
 				img.remove();
 
 				// HERE WE ARE CREATING OPTIONS...
 				res.data.forEach((el,i)=>{
 					const categoryOption = document.createElement('option');
-					categoryOption.innerHTML = el.material_name;	
-					categoryOption.addEventListener('click', ()=>{
+					categoryOption.innerHTML = el.category_name;	
+					categoryOption.addEventListener('click', async ()=>{
 						product.innerHTML = '';
-						console.log(el);
-						//el.products.forEach((el2, j)=>{
-						//	const productOption = document.createElement('option');
-						//	productOption.innerHTML = el2.name;
-						//	productOption.addEventListener('click', ()=>{
-						//		measure.innerHTML = this.state.calc.state.config.measureNames[el2.measure];
-						//	});
-		
-						//	product.appendChild(productOption);
-						//});
+						measure.innerHTML = '';
+						price.value = '';
+						let resMaterials = await this.state.server.sendReq('getMaterials', '&categoryId='+el.category_id);
+
+						resMaterials.data.forEach((el2, mi)=>{
+							const materialOption = document.createElement('option');
+							materialOption.innerHTML = el2.material_name;
+							materialOption.addEventListener('click', async ()=>{
+								amount.setAttribute('data-unit-price', el2.material_unit_price);
+								price.value = el2.material_unit_price * amount.value;
+
+								let resUnit = await this.state.server.sendReq('getUnit', '&unitId=' + el2.material_unit_id);	
+								measure.innerHTML = resUnit.data.unit_material_name;
+							});
+
+							product.appendChild(materialOption);	
+						}); // forEach2
+
+						
 					});
 		
 					category.appendChild(categoryOption);
-					});
+				}); // forEach1
 			});
 
 			const product = document.createElement('select');
@@ -64,6 +73,9 @@ export default function Renderer(props){
 	
 			const amount = document.createElement('input');
 			amount.value = 1;
+			amount.addEventListener('change', ()=>{
+				price.value = amount.dataset.unitPrice * amount.value;
+			});
 	
 			const measure = document.createElement('div');
 			// ...

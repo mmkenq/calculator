@@ -11,7 +11,9 @@ function router($params){
         switch ($method) {
             case 'check' : return true;
             case 'getStore': return $app->getStore($params);
-            case 'getMaterials': return $app->getMaterials($params);
+            case 'getCategories': return $app->getCategories($params);
+			case 'getMaterials': return $app->getMaterials($params);
+			case 'getUnit': return $app->getUnit($params);
         }
     }
     return false;

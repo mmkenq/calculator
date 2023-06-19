@@ -8,9 +8,9 @@ export default function Server(props){
 	};
 
 	// Send AJAX Request to server
-	this.sendReq = function sendReq(method){
+	this.sendReq = function sendReq(method, params = ''){
 		return new Promise((resolve, reject) => {
-			const url = serverURL + method;
+			const url = serverURL + method + params;
 			let req = new XMLHttpRequest();
 			req.addEventListener('load', reqListener.bind(null, req, resolve, reject));
 			req.open('GET', url, true);

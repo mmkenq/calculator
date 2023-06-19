@@ -39,9 +39,19 @@ class DB {
 		return $this->config;	
 	}
 
-	public function getMaterials(){
-		$query = 'SELECT * from calc_material';
+	public function getCategories(){
+		$query = 'SELECT * from calc_category';
 		return $this->getArray($query);
+	}
+
+	public function getMaterials($category_id){
+		$query = 'SELECT * from calc_material WHERE material_category_id=' . $category_id;
+		return $this->getArray($query);
+	}
+
+	public function getUnit($unit_id){
+		$query = 'SELECT * from calc_unit WHERE unit_id=' . $unit_id;
+		return $this->getArray($query)[0];
 	}
 }
 ?>
