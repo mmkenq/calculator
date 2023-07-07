@@ -3,7 +3,7 @@ export default function Renderer(props){
 		server: props.server,
 		calc: props.calc,	
 
-		itemId: 0
+		// itemId: 0
 	};
 
 	const {calc, itemId} = this.state;
@@ -27,6 +27,7 @@ export default function Renderer(props){
 
 			const category = document.createElement('select');
 			category.addEventListener('focus', async ()=>{
+				product.innerHTML = '';
 				category.innerHTML = '';
 				let img = document.createElement('img');
 				img.src = "assets/load2.gif";
