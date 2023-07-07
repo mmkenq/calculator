@@ -53,5 +53,9 @@ class DB {
 		$query = 'SELECT * from calc_unit WHERE unit_id=' . $unit_id;
 		return $this->getArray($query)[0];
 	}
+	public function getMaterialImage($material_img_id){
+		$query = 'SELECT * from calc_material_img WHERE img_id=' . $material_img_id;
+		return $this->getArray($query)[0];
+	}
 }
 ?>

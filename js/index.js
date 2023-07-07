@@ -8,16 +8,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
 	let config = new Config();
 	
 	let server = new Server({
-		config: config,
+		config: config.serverConfig,
 	});
 
 	let calc = new Calculator({
-		config: config,
+		//config: config,
 	});
 
 	let renderer = new Renderer({
-		server: server,
-		calc: calc,
+		config: config.rendererConfig,
+		server: server
 	});
 
 	renderer.showCalc();

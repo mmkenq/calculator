@@ -14,6 +14,7 @@ function router($params){
             case 'getCategories': return $app->getCategories($params);
 			case 'getMaterials': return $app->getMaterials($params);
 			case 'getUnit': return $app->getUnit($params);
+			case 'getMaterialImage': return $app->getMaterialImage($params);
         }
     }
     return false;
@@ -41,7 +42,7 @@ else if ($path["extension"] == "html") {
     header("Content-Type: text/html");
     readfile($_SERVER["SCRIPT_FILENAME"]);
 }
-else if ($path["extension"] == "gif") {
+else if ($path["extension"] == "gif" || $path["extension"] == "jpg") {
     header("Content-Type: image/gif");
     readfile($_SERVER["SCRIPT_FILENAME"]);
 }

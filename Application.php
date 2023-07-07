@@ -16,10 +16,13 @@ class Application {
 		return $this->db->getCategories();
 	}
 	public function getMaterials($params){
-		return $this->db->getMaterials($params['categoryId']);
+		return $this->db->getMaterials($params['category_id']);
 	}
 	public function getUnit($params){
-		return $this->db->getUnit($params['unitId']);
+		return $this->db->getUnit($params['unit_id']);
+	}
+	public function getMaterialImage($params){
+		return $this->db->getMaterialImage($params['material_img_id']);
 	}
 }
 

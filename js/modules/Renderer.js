@@ -1,12 +1,14 @@
 export default function Renderer(props){
-	this.state = {
-		server: props.server,
-		calc: props.calc,	
+	const { config, server } = props;
+	let itemId = 0;
+	//this.state = {
+	//	server: props.server,
+	//	calc: props.calc,	
 
-		// itemId: 0
-	};
+	//	itemId: 0
+	//};
 
-	const {calc, itemId} = this.state;
+	//const {calc, itemId} = this.state;
 
 	this.showCalc = function showCalc(){
 		const calcBox = document.getElementById('rdCalcBox');
@@ -17,7 +19,7 @@ export default function Renderer(props){
 		calcAddItem.innerHTML = 'add item';
 		calcAddItem.addEventListener('click', ()=>{
 			const item = document.createElement('div'); 
-			item.id = 'rdCalcItem-' + this.state.itemId;
+			item.id = 'rdCalcItem-' + itemId;
 	
 			const close = document.createElement('button');
 			close.innerHTML = 'X';
@@ -27,7 +29,7 @@ export default function Renderer(props){
 
 			const category = document.createElement('select');
 			category.addEventListener('focus', async ()=>{
-				product.innerHTML = '';
+				material.innerHTML = '';
 				category.innerHTML = '';
 				let img = document.createElement('img');
 				img.src = "assets/load2.gif";
@@ -35,7 +37,7 @@ export default function Renderer(props){
 				img.height = "100";
 				item.appendChild(img);
 
-				let res = await this.state.server.sendReq('getCategories');
+				let res = await server.sendReq('getCategories');
 				img.remove();
 
 				// HERE WE ARE CREATING OPTIONS...
@@ -43,10 +45,10 @@ export default function Renderer(props){
 					const categoryOption = document.createElement('option');
 					categoryOption.innerHTML = el.category_name;	
 					categoryOption.addEventListener('click', async ()=>{
-						product.innerHTML = '';
+						material.innerHTML = '';
 						measure.innerHTML = '';
 						price.value = '';
-						let resMaterials = await this.state.server.sendReq('getMaterials', '&categoryId='+el.category_id);
+						let resMaterials = await server.sendReq('getMaterials', '&category_id='+el.category_id);
 
 						resMaterials.data.forEach((el2, mi)=>{
 							const materialOption = document.createElement('option');
@@ -54,12 +56,17 @@ export default function Renderer(props){
 							materialOption.addEventListener('click', async ()=>{
 								amount.setAttribute('data-unit-price', el2.material_unit_price);
 								price.value = el2.material_unit_price * amount.value;
+								materialImgBox.src = '';
 
-								let resUnit = await this.state.server.sendReq('getUnit', '&unitId=' + el2.material_unit_id);	
+								let resUnit = await server.sendReq('getUnit', '&unit_id=' + el2.material_unit_id);	
 								measure.innerHTML = resUnit.data.unit_material_name;
+
+								let resImage = await server.sendReq('getMaterialImage', '&material_img_id=' + el2.material_img_id);
+								if(resImage.result == 'ok') materialImgBox.src = resImage.data.img_src;
+
 							});
 
-							product.appendChild(materialOption);	
+							material.appendChild(materialOption);	
 						}); // forEach2
 
 						
@@ -69,7 +76,7 @@ export default function Renderer(props){
 				}); // forEach1
 			});
 
-			const product = document.createElement('select');
+			const material = document.createElement('select');
 			// ...
 	
 			const amount = document.createElement('input');
@@ -81,15 +88,19 @@ export default function Renderer(props){
 			const measure = document.createElement('div');
 			// ...
 	
+			const materialImgBox = document.createElement('img');	
+
+			
 			const price = document.createElement('input');
 			price.disabled = true; 
 	
-			this.state.itemId++;
+			itemId++;
 			item.appendChild(close);
 			item.appendChild(category);
-			item.appendChild(product);
+			item.appendChild(material);
 			item.appendChild(amount);
 			item.appendChild(measure);
+			item.appendChild(materialImgBox);
 			item.appendChild(price);
 
 			calcForm.appendChild(item);
