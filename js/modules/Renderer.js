@@ -10,6 +10,40 @@ export default function Renderer(props){
 
 	//const {calc, itemId} = this.state;
 
+	this.showLogin = function showLogin(){
+		const loginBox = document.createElement('div');
+		loginBox.innerHTML = 'Чтобы сохранять историю заказов, используйте систему токенов:';
+
+		const loginBut = document.createElement('button');
+		loginBut.innerHTML = 'Login!';
+		loginBut.addEventListener('click', async function(){
+			const resLogin = await server.sendReq('signin', '&token=' + token.value);
+			// TODO: ...GET DATA FROM TOKEN
+			//
+			loginBox.innerHTML = 'SUCCESS<br>ВАШИ ЗАКАЗЫ: ...';
+		});
+
+		const token = document.createElement('input');
+		token.setAttribute('name', 'token');
+		token.placeholder = 'Введите ваш токен здесь';
+
+
+		const newUserToken = document.createElement('div');
+		newUserToken.innerHTML = 'Если вы здесь впервые, сгенерируйте новый токен: ';
+		const genTokenBut = document.createElement('button');
+		genTokenBut.innerHTML = 'сгенерировать';
+		genTokenBut.addEventListener('click', async function(){
+			const resNewUserToken = await server.sendReq('getNewUserToken');	
+			newUserToken.innerHTML = 'Ваш токен: ' + resNewUserToken.data;
+		});
+
+		loginBox.appendChild(token);
+		loginBox.appendChild(loginBut);
+		newUserToken.appendChild(genTokenBut);
+		loginBox.appendChild(newUserToken);
+		document.getElementsByTagName('body')[0].appendChild(loginBox);	
+	};
+
 	this.showCalc = function showCalc(){
 		const calcBox = document.getElementById('rdCalcBox');
 		const calcForm = document.createElement('form');

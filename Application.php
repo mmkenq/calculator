@@ -9,8 +9,11 @@ class Application {
 		$this->db = $db;
 	}
 
-	public function getStore($params){
-		return 'getStore';
+	public function getNewUserToken($params){
+		return bin2hex(random_bytes(4));
+	}
+	public function signin($params){
+		return $this->db->signin($params['token']);
 	}
 	public function getCategories($params){
 		return $this->db->getCategories();

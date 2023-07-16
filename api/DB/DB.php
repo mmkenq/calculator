@@ -39,6 +39,13 @@ class DB {
 		return $this->config;	
 	}
 
+	public function signin($user_token){
+		$query = 'INSERT INTO calc_user (user_token, user_is_active)
+				  VALUES ("' .$user_token. '", 1)
+				  ON DUPLICATE KEY UPDATE user_is_active=1';
+		return $this->db->query($query);
+	}
+
 	public function getCategories(){
 		$query = 'SELECT * from calc_category';
 		return $this->getArray($query);

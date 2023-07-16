@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 		server: server
 	});
 
+	renderer.showLogin();
 	renderer.showCalc();
 
 	// DEVELOP

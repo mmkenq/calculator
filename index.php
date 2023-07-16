@@ -10,7 +10,9 @@ function router($params){
         $app = new Application();
         switch ($method) {
             case 'check' : return true;
-            case 'getStore': return $app->getStore($params);
+			case 'getNewUserToken': return $app->getNewUserToken($params);
+			case 'signin': return $app->signin($params);
+            //case 'getStore': return $app->getStore($params);
             case 'getCategories': return $app->getCategories($params);
 			case 'getMaterials': return $app->getMaterials($params);
 			case 'getUnit': return $app->getUnit($params);
