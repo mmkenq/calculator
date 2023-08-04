@@ -1,26 +1,33 @@
 export default function Renderer(props){
 	const { config, server } = props;
 	let itemId = 0;
-	//this.state = {
-	//	server: props.server,
-	//	calc: props.calc,	
-
-	//	itemId: 0
-	//};
-
-	//const {calc, itemId} = this.state;
+	let items = [];
+	let orderUserToken = "";
 
 	this.showLogin = function showLogin(){
 		const loginBox = document.createElement('div');
 		loginBox.innerHTML = 'Чтобы сохранять историю заказов, используйте систему токенов:';
 
+		let orders = document.createElement('div');
+		orders.id = 'userOrders';
+		orders.innerHTML = 'ВАШИ ЗАКАЗЫ:<br>';
 		const loginBut = document.createElement('button');
 		loginBut.innerHTML = 'Login!';
+		let ordersData = [];
+
 		loginBut.addEventListener('click', async function(){
+			loginBox.innerHTML = 'Login as "' + token.value + '": wait...';
+			document.getElementById('orderBut').innerHTML = "order with '" + token.value + "' token";
+
 			const resLogin = await server.sendReq('signin', '&token=' + token.value);
-			// TODO: ...GET DATA FROM TOKEN
-			//
-			loginBox.innerHTML = 'SUCCESS<br>ВАШИ ЗАКАЗЫ: ...';
+			loginBox.innerHTML = 'Logged in as "' + token.value + '": SUCCESS<br>Login as another token: ';
+			loginBox.appendChild(token);
+			loginBox.appendChild(loginBut);
+
+			loginBox.appendChild(orders);
+			orderUserToken = token.value;
+			// TODO: ...GET SERVER DATA FROM TOKEN
+			ordersData = [];
 		});
 
 		const token = document.createElement('input');
@@ -29,12 +36,24 @@ export default function Renderer(props){
 
 
 		const newUserToken = document.createElement('div');
-		newUserToken.innerHTML = 'Если вы здесь впервые, сгенерируйте новый токен: ';
+		newUserToken.innerHTML = 'Если вы здесь впервые, токен сегенерируется автоматически при заказе. Либо можете сделать это сейчас: ';
 		const genTokenBut = document.createElement('button');
 		genTokenBut.innerHTML = 'сгенерировать';
 		genTokenBut.addEventListener('click', async function(){
+			loginBox.innerHTML = 'Creating new token": wait...';
+
 			const resNewUserToken = await server.sendReq('getNewUserToken');	
-			newUserToken.innerHTML = 'Ваш токен: ' + resNewUserToken.data;
+			const resLogin = await server.sendReq('signin', '&token=' + token.value);
+
+			document.getElementById('orderBut').innerHTML = "order with '" + resNewUserToken.data + "' token";
+
+			loginBox.innerHTML = 'Logged in as "' + resNewUserToken.data + '": SUCCESS<br>Login as another token: ';
+			loginBox.appendChild(token);
+			loginBox.appendChild(loginBut);
+			loginBox.appendChild(orders);
+
+			ordersData = [];
+			orderUserToken = resNewUserToken.data;
 		});
 
 		loginBox.appendChild(token);
@@ -108,6 +127,7 @@ export default function Renderer(props){
 		
 					category.appendChild(categoryOption);
 				}); // forEach1
+
 			});
 
 			const material = document.createElement('select');
@@ -138,7 +158,17 @@ export default function Renderer(props){
 			item.appendChild(price);
 
 			calcForm.appendChild(item);
-		});	
+
+			// Forming items data for the server
+			items.push({
+				itemId: itemId,
+				itemCategory: "TODO",
+				itemMaterial: "TODO",
+				itemAmount: "TODO",
+				itemPrice: "TODO",
+			});
+			console.log(items);
+		});	// calcAddItem.addEventListener()
 
 		const calcSumPrice = document.createElement('input');
 		calcSumPrice.disabled = true;
@@ -151,5 +181,24 @@ export default function Renderer(props){
 		// DEVELOP 
 		calcAddItem.dispatchEvent(new Event("click"));
 		//console.log(this.state);
+		
+		const orderBut = document.createElement("button");	
+		orderBut.id = "orderBut";
+		orderBut.innerHTML = "order";
+		orderBut.addEventListener('click', ()=>{
+			let date = new Date();
+			let order = {
+				msg: "hello Server!",
+				items: items,
+				orderSumPrice: "TODO",
+				orderDate: date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds(), 
+				orderUserToken: orderUserToken,
+			}
+
+			let msgToSrv = JSON.stringify(order);
+			console.log(order);
+			console.log(msgToSrv);
+		});
+		calcBox.appendChild(orderBut);
 	};
 }

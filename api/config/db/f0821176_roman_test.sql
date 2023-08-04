@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 10.0.2.30
--- Время создания: Июл 07 2023 г., 11:40
+-- Время создания: Авг 04 2023 г., 12:06
 -- Версия сервера: 5.7.37-40
 -- Версия PHP: 7.2.34
 
@@ -143,6 +143,7 @@ INSERT INTO `calc_material_img` (`img_id`, `img_src`) VALUES
 
 CREATE TABLE `calc_order` (
   `order_id` int(64) NOT NULL,
+  `order_user_token` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
   `order_provider_id` int(64) NOT NULL,
   `order_documents_ids` int(64) NOT NULL,
   `order_materials_ids` int(64) NOT NULL,
@@ -173,6 +174,38 @@ INSERT INTO `calc_unit` (`unit_id`, `unit_material_name`) VALUES
 (3, 'кг'),
 (4, 'т'),
 (5, 'л');
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `calc_user`
+--
+
+CREATE TABLE `calc_user` (
+  `user_id` int(128) NOT NULL,
+  `user_token` varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+  `user_is_active` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Дамп данных таблицы `calc_user`
+--
+
+INSERT INTO `calc_user` (`user_id`, `user_token`, `user_is_active`) VALUES
+(1, '24195e72', 1),
+(2, '24195e76', 1),
+(14, '24482df9', 1),
+(16, 'asdf234', 1),
+(22, 'bc4a3d13', 1),
+(25, '24195e75', 1),
+(28, 'a', 1),
+(29, 's', 1),
+(33, 'e9e56a0d', 1),
+(34, 'a8e5bbea', 1),
+(35, 'ba9152cf', 1),
+(37, '7180369d', 1),
+(40, 'c43a9c72', 1),
+(41, '2e58c4d1', 1);
 
 --
 -- Индексы сохранённых таблиц
@@ -209,6 +242,13 @@ ALTER TABLE `calc_unit`
   ADD PRIMARY KEY (`unit_id`);
 
 --
+-- Индексы таблицы `calc_user`
+--
+ALTER TABLE `calc_user`
+  ADD PRIMARY KEY (`user_id`),
+  ADD UNIQUE KEY `user_token` (`user_token`);
+
+--
 -- AUTO_INCREMENT для сохранённых таблиц
 --
 
@@ -241,6 +281,12 @@ ALTER TABLE `calc_order`
 --
 ALTER TABLE `calc_unit`
   MODIFY `unit_id` int(64) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT для таблицы `calc_user`
+--
+ALTER TABLE `calc_user`
+  MODIFY `user_id` int(128) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

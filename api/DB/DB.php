@@ -1,5 +1,4 @@
-<?php
-class DB {
+<?php class DB {
     function __construct($config) {
 		$this->config = $config;
         $host = $config["host"];
@@ -15,7 +14,7 @@ class DB {
                 $password
             );
         } catch (Exception $e) {
-            print_r('Error connecting to DB: ' . $e);
+            print_r('ERROR CONNECTION TO DB: ' . $e);
             die;
         }
     }
