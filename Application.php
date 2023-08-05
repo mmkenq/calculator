@@ -12,6 +12,12 @@ class Application {
 	public function getNewUserToken($params){
 		return bin2hex(random_bytes(4));
 	}
+	public function getUser($params){
+		return 'GETUSER REQ '.$params['token'];
+	}
+	public function getUserOrders($params){
+		return 'GETUSERORDERS REQ';
+	}
 	public function signin($params){
 		return $this->db->signin($params['token']);
 	}
@@ -26,6 +32,11 @@ class Application {
 	}
 	public function getMaterialImage($params){
 		return $this->db->getMaterialImage($params['material_img_id']);
+	}
+
+	public function makeOrder($params){
+		$data = json_decode($params['data']);
+		return $data;
 	}
 }
 

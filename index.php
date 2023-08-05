@@ -12,11 +12,13 @@ function router($params){
             case 'check' : return true;
 			case 'getNewUserToken': return $app->getNewUserToken($params);
 			case 'signin': return $app->signin($params);
-            //case 'getStore': return $app->getStore($params);
+			case 'getUser': return $app->getUser($params);
+			case 'getUserOrders': return $app->getUserOrders($params);
             case 'getCategories': return $app->getCategories($params);
 			case 'getMaterials': return $app->getMaterials($params);
 			case 'getUnit': return $app->getUnit($params);
 			case 'getMaterialImage': return $app->getMaterialImage($params);
+			case 'makeOrder': return $app->makeOrder($params);
         }
     }
     return false;

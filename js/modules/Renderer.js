@@ -1,8 +1,29 @@
 export default function Renderer(props){
 	const { config, server } = props;
-	let itemId = 0;
-	let items = [];
 	let orderUserToken = "";
+
+	function parseRdCalcForm(el){
+		let formData = {
+			items: [],
+			sumPrice: 0,
+		};
+
+		Array.from(el.getElementsByClassName('inputItem')).forEach((item, i)=>{
+			let category = Array.from(item.getElementsByClassName('category'))[0];
+			let material = Array.from(item.getElementsByClassName('material'))[0];
+			let amount = Array.from(item.getElementsByClassName('amount'))[0];
+			let price = Array.from(item.getElementsByClassName('price'))[0];
+
+			formData.items.push({
+				category_id: category.dataset.selectedCatId,
+				material_id: material.dataset.selectedMatId,
+				amount: Number(amount.value),
+				price: Number(price.value),
+			});
+		});
+
+		return formData;
+	}
 
 	this.showLogin = function showLogin(){
 		const loginBox = document.createElement('div');
@@ -13,7 +34,6 @@ export default function Renderer(props){
 		orders.innerHTML = 'ВАШИ ЗАКАЗЫ:<br>';
 		const loginBut = document.createElement('button');
 		loginBut.innerHTML = 'Login!';
-		let ordersData = [];
 
 		loginBut.addEventListener('click', async function(){
 			loginBox.innerHTML = 'Login as "' + token.value + '": wait...';
@@ -26,8 +46,10 @@ export default function Renderer(props){
 
 			loginBox.appendChild(orders);
 			orderUserToken = token.value;
-			// TODO: ...GET SERVER DATA FROM TOKEN
-			ordersData = [];
+			// TODO: ...GET USER ORDERS DATA FROM TOKEN
+			//const resUser = await server.sendReq('getUser', '&token=' + token.value);
+			const resUserOrders = await server.sendReq('getUserOrders', '&token=' + token.value);
+			console.log(resUserOrders);
 		});
 
 		const token = document.createElement('input');
@@ -52,7 +74,6 @@ export default function Renderer(props){
 			loginBox.appendChild(loginBut);
 			loginBox.appendChild(orders);
 
-			ordersData = [];
 			orderUserToken = resNewUserToken.data;
 		});
 
@@ -64,6 +85,7 @@ export default function Renderer(props){
 	};
 
 	this.showCalc = function showCalc(){
+
 		const calcBox = document.getElementById('rdCalcBox');
 		const calcForm = document.createElement('form');
 		calcForm.id = 'rdCalcForm';
@@ -72,7 +94,7 @@ export default function Renderer(props){
 		calcAddItem.innerHTML = 'add item';
 		calcAddItem.addEventListener('click', ()=>{
 			const item = document.createElement('div'); 
-			item.id = 'rdCalcItem-' + itemId;
+			item.setAttribute('class', 'inputItem');
 	
 			const close = document.createElement('button');
 			close.innerHTML = 'X';
@@ -81,6 +103,7 @@ export default function Renderer(props){
 			});
 
 			const category = document.createElement('select');
+			category.setAttribute('class', 'category');
 			category.addEventListener('focus', async ()=>{
 				material.innerHTML = '';
 				category.innerHTML = '';
@@ -95,46 +118,56 @@ export default function Renderer(props){
 
 				// HERE WE ARE CREATING OPTIONS...
 				res.data.forEach((el,i)=>{
+
 					const categoryOption = document.createElement('option');
 					categoryOption.innerHTML = el.category_name;	
-					categoryOption.addEventListener('click', async ()=>{
-						material.innerHTML = '';
-						measure.innerHTML = '';
-						price.value = '';
-						let resMaterials = await server.sendReq('getMaterials', '&category_id='+el.category_id);
-
-						resMaterials.data.forEach((el2, mi)=>{
-							const materialOption = document.createElement('option');
-							materialOption.innerHTML = el2.material_name;
-							materialOption.addEventListener('click', async ()=>{
-								amount.setAttribute('data-unit-price', el2.material_unit_price);
-								price.value = el2.material_unit_price * amount.value;
-								materialImgBox.src = '';
-
-								let resUnit = await server.sendReq('getUnit', '&unit_id=' + el2.material_unit_id);	
-								measure.innerHTML = resUnit.data.unit_material_name;
-
-								let resImage = await server.sendReq('getMaterialImage', '&material_img_id=' + el2.material_img_id);
-								if(resImage.result == 'ok') materialImgBox.src = resImage.data.img_src;
-
-							});
-
-							material.appendChild(materialOption);	
-						}); // forEach2
-
-						
-					});
-		
+					categoryOption.dataset.catId = res.data[i].category_id;
 					category.appendChild(categoryOption);
-				}); // forEach1
+		
+				});
+
+			});
+			category.addEventListener('change', async (ev)=>{
+				material.innerHTML = '';
+				measure.innerHTML = '';
+				price.value = '';
+
+				let catId = ev.target.options[ev.target.selectedIndex].dataset.catId;
+				category.dataset.selectedCatId = catId;
+
+				let resMaterials = await server.sendReq('getMaterials', '&category_id='+catId);
+				resMaterials.data.forEach((el, mi)=>{
+					const materialOption = document.createElement('option');
+					materialOption.innerHTML = el.material_name;
+					materialOption.dataset.matId = resMaterials.data[mi].material_id;
+					materialOption.addEventListener('click', async ()=>{
+						amount.setAttribute('data-unit-price', el.material_unit_price);
+						price.value = el.material_unit_price * amount.value;
+						materialImgBox.src = '';
+
+						let resUnit = await server.sendReq('getUnit', '&unit_id=' + el.material_unit_id);	
+						measure.innerHTML = resUnit.data.unit_material_name;
+
+						let resImage = await server.sendReq('getMaterialImage', '&material_img_id=' + el.material_img_id);
+						if(resImage.result == 'ok') materialImgBox.src = resImage.data.img_src;
+
+
+					});
+					material.appendChild(materialOption);	
+				});
 
 			});
 
 			const material = document.createElement('select');
-			// ...
+			material.setAttribute('class', 'material');
+			material.addEventListener('change', (ev)=>{
+				let matId = ev.target.options[ev.target.selectedIndex].dataset.matId;
+				material.dataset.selectedMatId = matId;
+			});
 	
 			const amount = document.createElement('input');
 			amount.value = 1;
+			amount.setAttribute('class', 'amount');
 			amount.addEventListener('change', ()=>{
 				price.value = amount.dataset.unitPrice * amount.value;
 			});
@@ -147,8 +180,8 @@ export default function Renderer(props){
 			
 			const price = document.createElement('input');
 			price.disabled = true; 
+			price.setAttribute('class', 'price');
 	
-			itemId++;
 			item.appendChild(close);
 			item.appendChild(category);
 			item.appendChild(material);
@@ -156,18 +189,8 @@ export default function Renderer(props){
 			item.appendChild(measure);
 			item.appendChild(materialImgBox);
 			item.appendChild(price);
-
 			calcForm.appendChild(item);
 
-			// Forming items data for the server
-			items.push({
-				itemId: itemId,
-				itemCategory: "TODO",
-				itemMaterial: "TODO",
-				itemAmount: "TODO",
-				itemPrice: "TODO",
-			});
-			console.log(items);
 		});	// calcAddItem.addEventListener()
 
 		const calcSumPrice = document.createElement('input');
@@ -185,19 +208,20 @@ export default function Renderer(props){
 		const orderBut = document.createElement("button");	
 		orderBut.id = "orderBut";
 		orderBut.innerHTML = "order";
-		orderBut.addEventListener('click', ()=>{
-			let date = new Date();
+		orderBut.addEventListener('click', async ()=>{
+			const form = parseRdCalcForm(calcForm);
+			const date = new Date();
 			let order = {
 				msg: "hello Server!",
-				items: items,
-				orderSumPrice: "TODO",
+				items: form.items,
+				orderSumPrice: form.sumPrice,
 				orderDate: date.getDate() + "/" + date.getMonth() + "/" + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds(), 
 				orderUserToken: orderUserToken,
 			}
 
 			let msgToSrv = JSON.stringify(order);
-			console.log(order);
-			console.log(msgToSrv);
+			let resOrder = await server.sendReq('makeOrder', '&data=' + msgToSrv);
+			console.log(resOrder);
 		});
 		calcBox.appendChild(orderBut);
 	};
