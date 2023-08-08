@@ -12,7 +12,7 @@ function router($params){
             case 'check' : return true;
 			case 'getNewUserToken': return $app->getNewUserToken($params);
 			case 'signin': return $app->signin($params);
-			case 'getUser': return $app->getUser($params);
+			//case 'getUser': return $app->getUser($params);
 			case 'getUserOrders': return $app->getUserOrders($params);
             case 'getCategories': return $app->getCategories($params);
 			case 'getMaterials': return $app->getMaterials($params);

@@ -8,12 +8,27 @@ class Application {
 
 		$this->db = $db;
 	}
+	private function checkUserToken($token){
+		if($token) return true;
+		else return false;
+	}
+	private function getUser($token){
+		return $this->db->getUser($token);
+	}
+	private function checkOrderItems($items){
+		foreach($items as $item){
+			if(isset($item->category_id,
+				$item->material_id, 
+				$item->amount,
+				$item->price)) continue;
+			else return false;
+		}
+		return true;
+	}
+
 
 	public function getNewUserToken($params){
 		return bin2hex(random_bytes(4));
-	}
-	public function getUser($params){
-		return 'GETUSER REQ '.$params['token'];
 	}
 	public function getUserOrders($params){
 		return 'GETUSERORDERS REQ';
@@ -36,7 +51,13 @@ class Application {
 
 	public function makeOrder($params){
 		$data = json_decode($params['data']);
-		return $data;
+		if($this->checkUserToken($data->orderUserToken)
+			&& $this->checkOrderItems($data->items)
+		){
+			$user = $this->getUser($data->orderUserToken)[0];
+			return $this->db->makeOrder($user->user_id, $data->items);
+		}
+		else return "ERROR: ONE OF THE FOLLOWING NOT PRESENT: (TOKEN, CATEGORY, MATERIAL, PRICE, AMOUNT)";
 	}
 }
 

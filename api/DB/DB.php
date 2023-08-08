@@ -38,6 +38,11 @@
 		return $this->config;	
 	}
 
+	public function getUser($user_token){
+		$query = 'SELECT * FROM calc_user WHERE user_token="' . $user_token . '"';
+		return $this->getArray($query);
+	}
+
 	public function signin($user_token){
 		$query = 'INSERT INTO calc_user (user_token, user_is_active)
 				  VALUES ("' .$user_token. '", 1)
@@ -62,6 +67,12 @@
 	public function getMaterialImage($material_img_id){
 		$query = 'SELECT * from calc_material_img WHERE img_id=' . $material_img_id;
 		return $this->getArray($query)[0];
+	}
+
+
+	public function makeOrder($user_id, $items){
+		$query = 'INSERT INTO calc_order (order_user_id, order_items) VALUES ('. $user_id .', \''. json_encode($items) . '\')';
+		return $this->db->query($query);
 	}
 }
 ?>

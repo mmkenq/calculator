@@ -65,7 +65,7 @@ export default function Renderer(props){
 			loginBox.innerHTML = 'Creating new token": wait...';
 
 			const resNewUserToken = await server.sendReq('getNewUserToken');	
-			const resLogin = await server.sendReq('signin', '&token=' + token.value);
+			const resLogin = await server.sendReq('signin', '&token=' + resNewUserToken.data);
 
 			document.getElementById('orderBut').innerHTML = "order with '" + resNewUserToken.data + "' token";
 
@@ -136,6 +136,8 @@ export default function Renderer(props){
 				category.dataset.selectedCatId = catId;
 
 				let resMaterials = await server.sendReq('getMaterials', '&category_id='+catId);
+				material.dataset.selectedMatId = resMaterials.data[0].material_id;
+
 				resMaterials.data.forEach((el, mi)=>{
 					const materialOption = document.createElement('option');
 					materialOption.innerHTML = el.material_name;
