@@ -35,21 +35,66 @@ export default function Renderer(props){
 		});	
 	}
 
-	function updateUserOrders(){
+	async function updateUserOrders(userToken, userOrdersBox){
+		userOrdersBox.innerHTML = 'ВАШИ ЗАКАЗЫ: ';
+		const resUserOrders = await server.sendReq('getUserOrders', '&token=' + userToken);
+		if(!Array.isArray(resUserOrders.data)) console.log(server.getRes(resUserOrders));
+		else {
+			resUserOrders.data.forEach((order, i) => {
+				const orderEntry = document.createElement('div');
+				orderEntry.id = 'order-no-' + order.order_id;
+				orderEntry.setAttribute('class', 'orderEntry');
+
+				const orderDate = document.createElement('div');
+				orderDate.setAttribute('class', 'orderDate');
+				orderDate.innerHTML = order.order_date;
+
+				const orderSumPrice = document.createElement('div');
+				orderSumPrice.setAttribute('class', 'orderSumPrice');
+				orderSumPrice.innerHTML = order.order_sum_price;
+				
+				orderEntry.appendChild(orderDate);
+				orderEntry.appendChild(orderSumPrice);
+
+				const orderItems = order.order_items;
+				orderItems.forEach((item, j) => {
+					const orderItem = document.createElement('div');
+					orderItem.setAttribute('class', 'orderItem');
+					
+					const orderItemPrice = document.createElement('input');
+					orderItemPrice.disabled = true;
+					orderItemPrice.value = item.price;
+
+					const orderItemAmount = document.createElement('input');
+					orderItemAmount.disabled = true;
+					orderItemAmount.value = item.amount;
+
+					const orderItemCatName = document.createElement('div');
+					orderItemCatName.innerHTML = item.category_name;
+					const orderItemMatName = document.createElement('div');
+					orderItemMatName.innerHTML = item.material_name;
+
+					orderItem.appendChild(orderItemCatName);
+					orderItem.appendChild(orderItemMatName);
+					orderItem.appendChild(orderItemAmount);
+					orderItem.appendChild(orderItemPrice);
+					orderEntry.appendChild(orderItem);
+				});
+
+				userOrdersBox.appendChild(orderEntry);
+			});
+		}
 	}
 
-	this.showLogin = function showLogin(){
+	this.showLogin = function (){
 		const loginBox = document.createElement('div');
+		loginBox.id = "rdLoginBox";
 		loginBox.innerHTML = 'Чтобы сохранять историю заказов, используйте систему токенов:';
 
-		let orders = document.createElement('div');
-		orders.id = 'userOrders';
-		orders.innerHTML = 'ВАШИ ЗАКАЗЫ:<br>';
 		const loginBut = document.createElement('button');
 		loginBut.innerHTML = 'Login!';
 
 		loginBut.addEventListener('click', async function(){
-			orders.innerHTML = 'ВАШИ ЗАКАЗЫ:<br>';
 			orderUserToken = token.value;
 			loginBox.innerHTML = 'Login as "' + orderUserToken + '": wait...';
 			document.getElementById('orderBut').innerHTML = "order with '" + orderUserToken + "' token";
@@ -59,54 +104,7 @@ export default function Renderer(props){
 			loginBox.appendChild(token);
 			loginBox.appendChild(loginBut);
 
-			loginBox.appendChild(orders);
-			const resUserOrders = await server.sendReq('getUserOrders', '&token=' + orderUserToken);
-			if(!Array.isArray(resUserOrders.data)) console.log(server.getRes(resUserOrders));
-			else {
-				resUserOrders.data.forEach((order, i) => {
-					const orderEntry = document.createElement('div');
-					orderEntry.id = 'order-no-' + order.order_id;
-					orderEntry.setAttribute('class', 'orderEntry');
-
-					const orderDate = document.createElement('div');
-					orderDate.setAttribute('class', 'orderDate');
-					orderDate.innerHTML = order.order_date;
-
-					const orderSumPrice = document.createElement('div');
-					orderSumPrice.setAttribute('class', 'orderSumPrice');
-					orderSumPrice.innerHTML = order.order_sum_price;
-					
-					orderEntry.appendChild(orderDate);
-					orderEntry.appendChild(orderSumPrice);
-
-					const orderItems = order.order_items;
-					orderItems.forEach((item, j) => {
-						const orderItem = document.createElement('div');
-						orderItem.setAttribute('class', 'orderItem');
-						
-						const orderItemPrice = document.createElement('input');
-						orderItemPrice.disabled = true;
-						orderItemPrice.value = item.price;
-
-						const orderItemAmount = document.createElement('input');
-						orderItemAmount.disabled = true;
-						orderItemAmount.value = item.amount;
-
-						const orderItemCatName = document.createElement('div');
-						orderItemCatName.innerHTML = item.category_name;
-						const orderItemMatName = document.createElement('div');
-						orderItemMatName.innerHTML = item.material_name;
-
-						orderItem.appendChild(orderItemCatName);
-						orderItem.appendChild(orderItemMatName);
-						orderItem.appendChild(orderItemAmount);
-						orderItem.appendChild(orderItemPrice);
-						orderEntry.appendChild(orderItem);
-					});
-
-					orders.appendChild(orderEntry);
-				});
-			}
+			updateUserOrders(orderUserToken, document.getElementById('userOrdersBox'));
 		});
 
 		const token = document.createElement('input');
@@ -129,7 +127,7 @@ export default function Renderer(props){
 			loginBox.innerHTML = 'Logged in as "' + resNewUserToken.data + '": SUCCESS<br>Login as another token: ';
 			loginBox.appendChild(token);
 			loginBox.appendChild(loginBut);
-			loginBox.appendChild(orders);
+			//loginBox.appendChild(orders);
 
 			orderUserToken = resNewUserToken.data;
 		});
@@ -141,7 +139,7 @@ export default function Renderer(props){
 		document.getElementsByTagName('body')[0].appendChild(loginBox);	
 	};
 
-	this.showCalc = function showCalc(){
+	this.showCalc = function (){
 
 		const calcBox = document.getElementById('rdCalcBox');
 		const calcForm = document.createElement('form');
@@ -290,8 +288,16 @@ export default function Renderer(props){
 			let resOrder = await server.sendReq('makeOrder', '&data=' + msgToSrv);
 			console.log(server.getRes(resOrder));
 
-			// TODO: updateUserOrders()
+			updateUserOrders(orderUserToken, document.getElementById('userOrdersBox')); 
 		});
 		calcBox.appendChild(orderBut);
 	};
+
+	this.showUserOrders = function(){
+		let userOrdersBox = document.createElement('div');
+		userOrdersBox.id = 'userOrdersBox';
+		userOrdersBox.innerHTML = '';
+		document.getElementsByTagName('body')[0].appendChild(userOrdersBox);
+	}
+
 }

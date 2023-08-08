@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 	renderer.showLogin();
 	renderer.showCalc();
+	renderer.showUserOrders();
 
 	// DEVELOP
 	console.log("CALC:", calc);

@@ -1,3 +1,8 @@
-#userOrders {
-	display: flex;
+#userOrdersBox {
+	display: grid;
+	grid-template-rows: 1fr;
+	overflow-x: auto;
+	grid-auto-flow: column;
+	grid-auto-columns: auto;
+	grid-gap: 15px;
 }
