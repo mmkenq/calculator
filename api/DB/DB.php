@@ -50,22 +50,36 @@
 		return $this->db->query($query);
 	}
 
-	public function getCategories(){
-		$query = 'SELECT * from calc_category';
+	public function getUserOrders($user_id){
+		$query = 'SELECT * FROM calc_order WHERE order_user_id=' . $user_id;
 		return $this->getArray($query);
+	}
+
+	public function getCategories(){
+		$query = 'SELECT * FROM calc_category';
+		return $this->getArray($query);
+	}
+	public function getCategory($category_id){
+		$query = 'SELECT * FROM calc_category WHERE category_id=' . $category_id; 
+		return $this->getArray($query)[0];
 	}
 
 	public function getMaterials($category_id){
-		$query = 'SELECT * from calc_material WHERE material_category_id=' . $category_id;
+		$query = 'SELECT * FROM calc_material WHERE material_category_id=' . $category_id;
 		return $this->getArray($query);
 	}
 
+	public function getMaterial($material_id){
+		$query = 'SELECT * FROM calc_material WHERE material_id=' . $material_id; 
+		return $this->getArray($query)[0];
+	}
+
 	public function getUnit($unit_id){
-		$query = 'SELECT * from calc_unit WHERE unit_id=' . $unit_id;
+		$query = 'SELECT * FROM calc_unit WHERE unit_id=' . $unit_id;
 		return $this->getArray($query)[0];
 	}
 	public function getMaterialImage($material_img_id){
-		$query = 'SELECT * from calc_material_img WHERE img_id=' . $material_img_id;
+		$query = 'SELECT * FROM calc_material_img WHERE img_id=' . $material_img_id;
 		return $this->getArray($query)[0];
 	}
 

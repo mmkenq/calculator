@@ -36,19 +36,51 @@ export default function Renderer(props){
 		loginBut.innerHTML = 'Login!';
 
 		loginBut.addEventListener('click', async function(){
-			loginBox.innerHTML = 'Login as "' + token.value + '": wait...';
-			document.getElementById('orderBut').innerHTML = "order with '" + token.value + "' token";
+			orders.innerHTML = 'ВАШИ ЗАКАЗЫ:<br>';
+			orderUserToken = token.value;
+			loginBox.innerHTML = 'Login as "' + orderUserToken + '": wait...';
+			document.getElementById('orderBut').innerHTML = "order with '" + orderUserToken + "' token";
 
-			const resLogin = await server.sendReq('signin', '&token=' + token.value);
-			loginBox.innerHTML = 'Logged in as "' + token.value + '": SUCCESS<br>Login as another token: ';
+			const resLogin = await server.sendReq('signin', '&token=' + orderUserToken);
+			loginBox.innerHTML = 'Logged in as "' + orderUserToken + '": SUCCESS<br>Login as another token: ';
 			loginBox.appendChild(token);
 			loginBox.appendChild(loginBut);
 
 			loginBox.appendChild(orders);
-			orderUserToken = token.value;
-			// TODO: ...GET USER ORDERS DATA FROM TOKEN
-			//const resUser = await server.sendReq('getUser', '&token=' + token.value);
-			const resUserOrders = await server.sendReq('getUserOrders', '&token=' + token.value);
+			const resUserOrders = await server.sendReq('getUserOrders', '&token=' + orderUserToken);
+			resUserOrders.data.forEach((order, i) => {
+				const orderEntry = document.createElement('div');
+				orderEntry.id = 'order-no-' + order.order_id;
+				orderEntry.setAttribute('class', 'orderEntry');
+
+				const orderItems = order.order_items;
+				orderItems.forEach((item, j) => {
+					const orderItem = document.createElement('div');
+					orderItem.setAttribute('class', 'orderItem');
+					
+					const orderItemPrice = document.createElement('input');
+					orderItemPrice.disabled = true;
+					orderItemPrice.value = item.price;
+
+					const orderItemAmount = document.createElement('input');
+					orderItemAmount.disabled = true;
+					orderItemAmount.value = item.amount;
+
+					const orderItemCatName = document.createElement('div');
+					orderItemCatName.innerHTML = item.category_name;
+
+					const orderItemMatName = document.createElement('div');
+					orderItemMatName.innerHTML = item.material_name;
+
+					orderItem.appendChild(orderItemCatName);
+					orderItem.appendChild(orderItemMatName);
+					orderItem.appendChild(orderItemAmount);
+					orderItem.appendChild(orderItemPrice);
+					orderEntry.appendChild(orderItem);
+				});
+
+				orders.appendChild(orderEntry);
+			});
 			console.log(resUserOrders);
 		});
 
