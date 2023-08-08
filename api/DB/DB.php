@@ -84,8 +84,8 @@
 	}
 
 
-	public function makeOrder($user_id, $items){
-		$query = 'INSERT INTO calc_order (order_user_id, order_items) VALUES ('. $user_id .', \''. json_encode($items) . '\')';
+	public function makeOrder($user_id, $items, $order_date, $order_sum_price){
+		$query = 'INSERT INTO calc_order (order_user_id, order_items, order_date, order_sum_price) VALUES ('. $user_id .', \''. json_encode($items) . '\', \'' . $order_date . '\', ' . $order_sum_price . ')';
 		return $this->db->query($query);
 	}
 }

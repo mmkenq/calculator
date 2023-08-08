@@ -1,4 +1,5 @@
 <?php
+require_once("./api/ERRS/ERRS.php");
 require_once("./api/DB/DB.php");
 
 class Application {
@@ -8,6 +9,7 @@ class Application {
 
 		$this->db = $db;
 	}
+
 	private function checkUserToken($token){
 		if($token) return true;
 		else return false;
@@ -40,6 +42,7 @@ class Application {
 	public function getUserOrders($params){
 		$user = $this->getUser($params['token'])[0];
 		$orders = $this->db->getUserOrders($user->user_id);
+		if(!$orders) return ERR_NO_USER_ORDERS;
 		foreach($orders as $order){
 			$order->order_items = json_decode($order->order_items);
 			foreach($order->order_items as $item){
@@ -75,9 +78,13 @@ class Application {
 			&& $this->checkOrderItems($data->items)
 		){
 			$user = $this->getUser($data->orderUserToken)[0];
-			return $this->db->makeOrder($user->user_id, $data->items);
+			$this->db->makeOrder($user->user_id,
+				$data->items,
+				$data->orderDate,
+				$data->orderSumPrice);
+			return SUCCESS;
 		}
-		else return "ERROR: ONE OF THE FOLLOWING NOT PRESENT: (TOKEN, CATEGORY, MATERIAL, PRICE, AMOUNT)";
+		else return ERR_NOT_ENOUGH_FORM_DATA; 
 	}
 }
 

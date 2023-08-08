@@ -20,9 +20,22 @@ export default function Renderer(props){
 				amount: Number(amount.value),
 				price: Number(price.value),
 			});
+
+			formData.sumPrice += Number(price.value);
 		});
 
 		return formData;
+	}
+
+	function updateSumPrice(calcForm, calcSumPrice){
+		let prices = Array.from(calcForm.getElementsByClassName('price'));
+		calcSumPrice.value = 0;
+		prices.forEach((price,i)=>{
+			calcSumPrice.value = Number(calcSumPrice.value) + Number(price.value);
+		});	
+	}
+
+	function updateUserOrders(){
 	}
 
 	this.showLogin = function showLogin(){
@@ -48,40 +61,52 @@ export default function Renderer(props){
 
 			loginBox.appendChild(orders);
 			const resUserOrders = await server.sendReq('getUserOrders', '&token=' + orderUserToken);
-			resUserOrders.data.forEach((order, i) => {
-				const orderEntry = document.createElement('div');
-				orderEntry.id = 'order-no-' + order.order_id;
-				orderEntry.setAttribute('class', 'orderEntry');
+			if(!Array.isArray(resUserOrders.data)) console.log(server.getRes(resUserOrders));
+			else {
+				resUserOrders.data.forEach((order, i) => {
+					const orderEntry = document.createElement('div');
+					orderEntry.id = 'order-no-' + order.order_id;
+					orderEntry.setAttribute('class', 'orderEntry');
 
-				const orderItems = order.order_items;
-				orderItems.forEach((item, j) => {
-					const orderItem = document.createElement('div');
-					orderItem.setAttribute('class', 'orderItem');
+					const orderDate = document.createElement('div');
+					orderDate.setAttribute('class', 'orderDate');
+					orderDate.innerHTML = order.order_date;
+
+					const orderSumPrice = document.createElement('div');
+					orderSumPrice.setAttribute('class', 'orderSumPrice');
+					orderSumPrice.innerHTML = order.order_sum_price;
 					
-					const orderItemPrice = document.createElement('input');
-					orderItemPrice.disabled = true;
-					orderItemPrice.value = item.price;
+					orderEntry.appendChild(orderDate);
+					orderEntry.appendChild(orderSumPrice);
 
-					const orderItemAmount = document.createElement('input');
-					orderItemAmount.disabled = true;
-					orderItemAmount.value = item.amount;
+					const orderItems = order.order_items;
+					orderItems.forEach((item, j) => {
+						const orderItem = document.createElement('div');
+						orderItem.setAttribute('class', 'orderItem');
+						
+						const orderItemPrice = document.createElement('input');
+						orderItemPrice.disabled = true;
+						orderItemPrice.value = item.price;
 
-					const orderItemCatName = document.createElement('div');
-					orderItemCatName.innerHTML = item.category_name;
+						const orderItemAmount = document.createElement('input');
+						orderItemAmount.disabled = true;
+						orderItemAmount.value = item.amount;
 
-					const orderItemMatName = document.createElement('div');
-					orderItemMatName.innerHTML = item.material_name;
+						const orderItemCatName = document.createElement('div');
+						orderItemCatName.innerHTML = item.category_name;
+						const orderItemMatName = document.createElement('div');
+						orderItemMatName.innerHTML = item.material_name;
 
-					orderItem.appendChild(orderItemCatName);
-					orderItem.appendChild(orderItemMatName);
-					orderItem.appendChild(orderItemAmount);
-					orderItem.appendChild(orderItemPrice);
-					orderEntry.appendChild(orderItem);
+						orderItem.appendChild(orderItemCatName);
+						orderItem.appendChild(orderItemMatName);
+						orderItem.appendChild(orderItemAmount);
+						orderItem.appendChild(orderItemPrice);
+						orderEntry.appendChild(orderItem);
+					});
+
+					orders.appendChild(orderEntry);
 				});
-
-				orders.appendChild(orderEntry);
-			});
-			console.log(resUserOrders);
+			}
 		});
 
 		const token = document.createElement('input');
@@ -132,6 +157,7 @@ export default function Renderer(props){
 			close.innerHTML = 'X';
 			close.addEventListener('click', ()=>{
 				item.remove();
+				updateSumPrice(calcForm, calcSumPrice);
 			});
 
 			const category = document.createElement('select');
@@ -170,6 +196,11 @@ export default function Renderer(props){
 				let resMaterials = await server.sendReq('getMaterials', '&category_id='+catId);
 				material.dataset.selectedMatId = resMaterials.data[0].material_id;
 
+				let unitPrice = resMaterials.data[0].material_unit_price;
+				amount.setAttribute('data-unit-price', unitPrice);
+				price.value = unitPrice * amount.value;
+				updateSumPrice(calcForm, calcSumPrice);
+
 				resMaterials.data.forEach((el, mi)=>{
 					const materialOption = document.createElement('option');
 					materialOption.innerHTML = el.material_name;
@@ -177,6 +208,7 @@ export default function Renderer(props){
 					materialOption.addEventListener('click', async ()=>{
 						amount.setAttribute('data-unit-price', el.material_unit_price);
 						price.value = el.material_unit_price * amount.value;
+						updateSumPrice(calcForm, calcSumPrice);
 						materialImgBox.src = '';
 
 						let resUnit = await server.sendReq('getUnit', '&unit_id=' + el.material_unit_id);	
@@ -204,6 +236,7 @@ export default function Renderer(props){
 			amount.setAttribute('class', 'amount');
 			amount.addEventListener('change', ()=>{
 				price.value = amount.dataset.unitPrice * amount.value;
+				updateSumPrice(calcForm, calcSumPrice);
 			});
 	
 			const measure = document.createElement('div');
@@ -255,7 +288,9 @@ export default function Renderer(props){
 
 			let msgToSrv = JSON.stringify(order);
 			let resOrder = await server.sendReq('makeOrder', '&data=' + msgToSrv);
-			console.log(resOrder);
+			console.log(server.getRes(resOrder));
+
+			// TODO: updateUserOrders()
 		});
 		calcBox.appendChild(orderBut);
 	};
