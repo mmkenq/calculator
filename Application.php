@@ -74,17 +74,15 @@ class Application {
 
 	public function makeOrder($params){
 		$data = json_decode($params['data']);
-		if($this->checkUserToken($data->orderUserToken)
-			&& $this->checkOrderItems($data->items)
-		){
-			$user = $this->getUser($data->orderUserToken)[0];
-			$this->db->makeOrder($user->user_id,
-				$data->items,
-				$data->orderDate,
-				$data->orderSumPrice);
-			return SUCCESS;
-		}
-		else return ERR_NOT_ENOUGH_FORM_DATA; 
+		if(!$this->checkUserToken($data->orderUserToken)) return ERR_NO_USER_TOKEN;
+		if(!$this->checkOrderItems($data->items)) return ERR_NOT_ENOUGH_FORM_DATA;
+
+		$user = $this->getUser($data->orderUserToken)[0];
+		$this->db->makeOrder($user->user_id,
+			$data->items,
+			$data->orderDate,
+			$data->orderSumPrice);
+		return SUCCESS;
 	}
 }
 

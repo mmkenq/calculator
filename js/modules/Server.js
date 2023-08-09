@@ -18,18 +18,22 @@ export default function Server(props){
 		});
 	};
 
-	const errs = {
+	this.errs = {
 		"SUCCESS": 999,
 		"ERR_NO_USER_ORDERS": 100,
 		"ERR_NOT_ENOUGH_FORM_DATA": 101,
+		"ERR_NO_USER_TOKEN": 102,
 	}
 
 	this.getRes = function(response){
+		const errs = this.errs;
+
 		switch(response.data){
-			case errs["SUCCESS"]: return "SUCCESS";
-			case errs["ERR_NO_USER_ORDERS"]: return "ERR: NO USER ORDERS...";
-			case errs["ERR_NOT_ENOUGH_FORM_DATA"]: return "ERR: ONE OF THE FOLLOWING NOT PRESENT: (TOKEN, CATEGORY, MATERIAL, PRICE, AMOUNT)";
-			default: return {msg: "SOME ERROR", res: response};
+			case errs["SUCCESS"]: return "SERVER: SUCCESS";
+			case errs["ERR_NO_USER_ORDERS"]: return "SERVER ERR: NO USER ORDERS...";
+			case errs["ERR_NOT_ENOUGH_FORM_DATA"]: return "SERVER ERR: ONE OF THE FOLLOWING NOT PRESENT: (TOKEN, CATEGORY, MATERIAL, PRICE, AMOUNT)";
+			case errs["ERR_NO_USER_TOKEN"]: return "SERVER ERR: server didn\'t get USER_TOKEN";
+			default: return {msg: "SERVER: SOME ERROR", res: response};
 		}	
 	};
 }

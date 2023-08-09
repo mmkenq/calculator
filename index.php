@@ -46,6 +46,10 @@ else if ($path["extension"] == "html") {
     header("Content-Type: text/html");
     readfile($_SERVER["SCRIPT_FILENAME"]);
 }
+else if ($path["extension"] == "css") {
+    header("Content-Type: text/css");
+    readfile($_SERVER["SCRIPT_FILENAME"]);
+}
 else if ($path["extension"] == "gif" || $path["extension"] == "jpg") {
     header("Content-Type: image/gif");
     readfile($_SERVER["SCRIPT_FILENAME"]);

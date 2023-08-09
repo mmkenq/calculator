@@ -1,2 +1,2 @@
 RewriteEngine on
-RewriteRule ^((?!index\.php|(.+)\.(gif|js)).+)$ /index.php [L]
+RewriteRule ^((?!index\.php|(.+)\.(gif|js|css)).+)$ /index.php [L]

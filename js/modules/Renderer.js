@@ -86,10 +86,13 @@ export default function Renderer(props){
 		}
 	}
 
-	this.showLogin = function (){
-		const loginBox = document.createElement('div');
-		loginBox.id = "rdLoginBox";
-		loginBox.innerHTML = 'Чтобы сохранять историю заказов, используйте систему токенов:';
+	function updateLoginBox(newUserToken, loginBox){
+		const token = document.createElement('input');
+		token.setAttribute('name', 'token');
+		token.placeholder = 'Введите ваш токен здесь';
+
+		loginBox.innerHTML = 'Logged in as "' + newUserToken + '": SUCCESS<br>Login as another token: ';
+		document.getElementById('orderBut').innerHTML = "order with '" + newUserToken + "' token";
 
 		const loginBut = document.createElement('button');
 		loginBut.innerHTML = 'Login!';
@@ -100,17 +103,35 @@ export default function Renderer(props){
 			document.getElementById('orderBut').innerHTML = "order with '" + orderUserToken + "' token";
 
 			const resLogin = await server.sendReq('signin', '&token=' + orderUserToken);
-			loginBox.innerHTML = 'Logged in as "' + orderUserToken + '": SUCCESS<br>Login as another token: ';
-			loginBox.appendChild(token);
-			loginBox.appendChild(loginBut);
-
+			updateLoginBox(orderUserToken, loginBox);
 			updateUserOrders(orderUserToken, document.getElementById('userOrdersBox'));
 		});
+
+		loginBox.appendChild(token);
+		loginBox.appendChild(loginBut);
+	}
+
+	this.showLogin = function (){
+		const loginBox = document.createElement('div');
+		loginBox.id = "rdLoginBox";
+		loginBox.innerHTML = 'Чтобы сохранять историю заказов, используйте систему токенов:';
 
 		const token = document.createElement('input');
 		token.setAttribute('name', 'token');
 		token.placeholder = 'Введите ваш токен здесь';
 
+		const loginBut = document.createElement('button');
+		loginBut.innerHTML = 'Login!';
+
+		loginBut.addEventListener('click', async function(){
+			orderUserToken = token.value;
+			loginBox.innerHTML = 'Login as "' + orderUserToken + '": wait...';
+			document.getElementById('orderBut').innerHTML = "order with '" + orderUserToken + "' token";
+
+			const resLogin = await server.sendReq('signin', '&token=' + orderUserToken);
+			updateLoginBox(orderUserToken, loginBox);
+			updateUserOrders(orderUserToken, document.getElementById('userOrdersBox'));
+		});
 
 		const newUserToken = document.createElement('div');
 		newUserToken.innerHTML = 'Если вы здесь впервые, токен сегенерируется автоматически при заказе. Либо можете сделать это сейчас: ';
@@ -122,14 +143,9 @@ export default function Renderer(props){
 			const resNewUserToken = await server.sendReq('getNewUserToken');	
 			const resLogin = await server.sendReq('signin', '&token=' + resNewUserToken.data);
 
-			document.getElementById('orderBut').innerHTML = "order with '" + resNewUserToken.data + "' token";
-
-			loginBox.innerHTML = 'Logged in as "' + resNewUserToken.data + '": SUCCESS<br>Login as another token: ';
-			loginBox.appendChild(token);
-			loginBox.appendChild(loginBut);
-			//loginBox.appendChild(orders);
 
 			orderUserToken = resNewUserToken.data;
+			updateLoginBox(orderUserToken, loginBox);
 		});
 
 		loginBox.appendChild(token);
@@ -275,6 +291,24 @@ export default function Renderer(props){
 		orderBut.innerHTML = "order";
 		orderBut.addEventListener('click', async ()=>{
 			const form = parseRdCalcForm(calcForm);
+
+			// Check FORM_FIELDS
+			for(let i = 0; i < form.items.length; i++){
+				if(!form.items[i].category_id || !form.items[i].material_id){
+					alert('ERR: not enough data, fill all fields!');
+					return;
+				}
+			}
+
+			// Check USER_TOKEN
+			if(!orderUserToken){
+				const resNewUserToken = await server.sendReq('getNewUserToken');	
+				const resLogin = await server.sendReq('signin', '&token=' + resNewUserToken.data);
+				orderUserToken = resNewUserToken.data;
+				updateLoginBox(orderUserToken, document.getElementById('rdLoginBox')); 
+			}
+
+
 			const date = new Date();
 			let order = {
 				msg: "hello Server!",
@@ -286,9 +320,13 @@ export default function Renderer(props){
 
 			let msgToSrv = JSON.stringify(order);
 			let resOrder = await server.sendReq('makeOrder', '&data=' + msgToSrv);
-			console.log(server.getRes(resOrder));
-
+			if(resOrder.data == server.errs['ERR_NO_USER_TOKEN'] || 
+				resOrder.data == server.errs['ERR_NOT_ENOUGH_FORM_DATA']){
+				alert(server.getRes(resOrder));
+				return;
+			}
 			updateUserOrders(orderUserToken, document.getElementById('userOrdersBox')); 
+
 		});
 		calcBox.appendChild(orderBut);
 	};
