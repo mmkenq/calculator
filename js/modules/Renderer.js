@@ -37,7 +37,15 @@ export default function Renderer(props){
 
 	async function updateUserOrders(userToken, userOrdersBox){
 		userOrdersBox.innerHTML = 'ВАШИ ЗАКАЗЫ: ';
+		let loadImg = document.createElement('img');
+		loadImg.src = "assets/load2.gif";
+		//loadImg.width = "200";
+		loadImg.height = "100";
+		userOrdersBox.appendChild(loadImg);
+
 		const resUserOrders = await server.sendReq('getUserOrders', '&token=' + userToken);
+		userOrdersBox.innerHTML = 'ВАШИ ЗАКАЗЫ: ';
+
 		if(!Array.isArray(resUserOrders.data)) console.log(server.getRes(resUserOrders));
 		else {
 			resUserOrders.data.forEach((order, i) => {
@@ -47,11 +55,11 @@ export default function Renderer(props){
 
 				const orderDate = document.createElement('div');
 				orderDate.setAttribute('class', 'orderDate');
-				orderDate.innerHTML = order.order_date;
+				orderDate.innerHTML = 'ORDER DATE: ' + order.order_date;
 
 				const orderSumPrice = document.createElement('div');
 				orderSumPrice.setAttribute('class', 'orderSumPrice');
-				orderSumPrice.innerHTML = order.order_sum_price;
+				orderSumPrice.innerHTML = 'TOTAL PRICE: <font color="#75b482"> ' + order.order_sum_price + '</font>';
 				
 				orderEntry.appendChild(orderDate);
 				orderEntry.appendChild(orderSumPrice);
@@ -61,23 +69,44 @@ export default function Renderer(props){
 					const orderItem = document.createElement('div');
 					orderItem.setAttribute('class', 'orderItem');
 					
+
+					const orderItemPriceWrapper = document.createElement('div');
+					orderItemPriceWrapper.setAttribute('class', 'orderItemPriceWrapper');
+
+					const orderItemPriceText = document.createElement('p');
+					orderItemPriceText.innerHTML = 'PRICE: ';
+
 					const orderItemPrice = document.createElement('input');
 					orderItemPrice.disabled = true;
 					orderItemPrice.value = item.price;
+					orderItemPrice.style.color = "#75b482";
+
+					orderItemPriceWrapper.appendChild(orderItemPriceText);
+					orderItemPriceWrapper.appendChild(orderItemPrice);
+
+
+					const orderItemAmountWrapper = document.createElement('div');
+					orderItemAmountWrapper.setAttribute('class', 'orderItemAmountWrapper');
+
+					const orderItemAmountText = document.createElement('p');
+					orderItemAmountText.innerHTML = 'AMOUNT: ';
 
 					const orderItemAmount = document.createElement('input');
 					orderItemAmount.disabled = true;
 					orderItemAmount.value = item.amount;
 
+					orderItemAmountWrapper.appendChild(orderItemAmountText);
+					orderItemAmountWrapper.appendChild(orderItemAmount);
+
 					const orderItemCatName = document.createElement('div');
-					orderItemCatName.innerHTML = item.category_name;
+					orderItemCatName.innerHTML = 'CATEGORY: ' + item.category_name;
 					const orderItemMatName = document.createElement('div');
-					orderItemMatName.innerHTML = item.material_name;
+					orderItemMatName.innerHTML = 'MATERIAL: ' + item.material_name;
 
 					orderItem.appendChild(orderItemCatName);
 					orderItem.appendChild(orderItemMatName);
-					orderItem.appendChild(orderItemAmount);
-					orderItem.appendChild(orderItemPrice);
+					orderItem.appendChild(orderItemAmountWrapper);
+					orderItem.appendChild(orderItemPriceWrapper);
 					orderEntry.appendChild(orderItem);
 				});
 
@@ -104,7 +133,7 @@ export default function Renderer(props){
 
 			const resLogin = await server.sendReq('signin', '&token=' + orderUserToken);
 			updateLoginBox(orderUserToken, loginBox);
-			updateUserOrders(orderUserToken, document.getElementById('userOrdersBox'));
+			updateUserOrders(orderUserToken, document.getElementById('rdUserOrdersBox'));
 		});
 
 		loginBox.appendChild(token);
@@ -130,7 +159,7 @@ export default function Renderer(props){
 
 			const resLogin = await server.sendReq('signin', '&token=' + orderUserToken);
 			updateLoginBox(orderUserToken, loginBox);
-			updateUserOrders(orderUserToken, document.getElementById('userOrdersBox'));
+			updateUserOrders(orderUserToken, document.getElementById('rdUserOrdersBox'));
 		});
 
 		const newUserToken = document.createElement('div');
@@ -176,6 +205,7 @@ export default function Renderer(props){
 
 			const category = document.createElement('select');
 			category.setAttribute('class', 'category');
+			category.innerHTML = '<option>select category</option>';
 			category.addEventListener('focus', async ()=>{
 				material.innerHTML = '';
 				category.innerHTML = '';
@@ -201,6 +231,7 @@ export default function Renderer(props){
 			});
 			category.addEventListener('change', async (ev)=>{
 				material.innerHTML = '';
+				materialPreview.src = '';
 				measure.innerHTML = '';
 				price.value = '';
 
@@ -209,6 +240,13 @@ export default function Renderer(props){
 
 				let resMaterials = await server.sendReq('getMaterials', '&category_id='+catId);
 				material.dataset.selectedMatId = resMaterials.data[0].material_id;
+
+				let resUnit = await server.sendReq('getUnit', '&unit_id=' + resMaterials.data[0].material_unit_id);	
+				measure.innerHTML = resUnit.data.unit_material_name;
+
+				let resImage = await server.sendReq('getMaterialImage', '&material_img_id=' + resMaterials.data[0].material_img_id);
+				if(resImage.result == 'ok') materialPreview.src = resImage.data.img_src;
+
 
 				let unitPrice = resMaterials.data[0].material_unit_price;
 				amount.setAttribute('data-unit-price', unitPrice);
@@ -223,13 +261,13 @@ export default function Renderer(props){
 						amount.setAttribute('data-unit-price', el.material_unit_price);
 						price.value = el.material_unit_price * amount.value;
 						updateSumPrice(calcForm, calcSumPrice);
-						materialImgBox.src = '';
+						materialPreview.src = '';
 
 						let resUnit = await server.sendReq('getUnit', '&unit_id=' + el.material_unit_id);	
 						measure.innerHTML = resUnit.data.unit_material_name;
 
 						let resImage = await server.sendReq('getMaterialImage', '&material_img_id=' + el.material_img_id);
-						if(resImage.result == 'ok') materialImgBox.src = resImage.data.img_src;
+						if(resImage.result == 'ok') materialPreview.src = resImage.data.img_src;
 
 
 					});
@@ -240,6 +278,7 @@ export default function Renderer(props){
 
 			const material = document.createElement('select');
 			material.setAttribute('class', 'material');
+			material.innerHTML = '<option>select material then</option>';
 			material.addEventListener('change', (ev)=>{
 				let matId = ev.target.options[ev.target.selectedIndex].dataset.matId;
 				material.dataset.selectedMatId = matId;
@@ -254,31 +293,46 @@ export default function Renderer(props){
 			});
 	
 			const measure = document.createElement('div');
-			// ...
+			measure.setAttribute('class', 'orderItemUnit');
 	
-			const materialImgBox = document.createElement('img');	
+			const materialPreview = document.createElement('img');	
+			materialPreview.setAttribute('class', 'materialPreview');
 
 			
 			const price = document.createElement('input');
 			price.disabled = true; 
 			price.setAttribute('class', 'price');
+
+			const moneyMeasure = document.createElement('div');
+			moneyMeasure.setAttribute('class', 'moneyUnit');
+			moneyMeasure.innerHTML = 'руб.';
 	
 			item.appendChild(close);
 			item.appendChild(category);
 			item.appendChild(material);
 			item.appendChild(amount);
 			item.appendChild(measure);
-			item.appendChild(materialImgBox);
+			item.appendChild(materialPreview);
 			item.appendChild(price);
+			item.appendChild(moneyMeasure);
 			calcForm.appendChild(item);
 
 		});	// calcAddItem.addEventListener()
 
+		const calcSumPriceWraper = document.createElement('div');
+		calcSumPriceWraper.setAttribute('class', 'calcSumPriceWraper');
+
 		const calcSumPrice = document.createElement('input');
 		calcSumPrice.disabled = true;
-		calcSumPrice.placeholder = 'SUM PRICE';
+		calcSumPrice.placeholder = 'To be continued...';
 
-		calcForm.appendChild(calcSumPrice);
+		const calcSumPriceText = document.createElement('p');
+		calcSumPriceText.innerHTML = 'TOTAL PRICE: ';
+
+		calcSumPriceWraper.appendChild(calcSumPriceText);
+		calcSumPriceWraper.appendChild(calcSumPrice);
+
+		calcForm.appendChild(calcSumPriceWraper);
 		calcBox.appendChild(calcForm);
 		calcBox.appendChild(calcAddItem);
 
@@ -291,6 +345,11 @@ export default function Renderer(props){
 		orderBut.innerHTML = "order";
 		orderBut.addEventListener('click', async ()=>{
 			const form = parseRdCalcForm(calcForm);
+
+			if(form.items.length == 0){
+				alert('ERR: no items!');
+				return;
+			}
 
 			// Check FORM_FIELDS
 			for(let i = 0; i < form.items.length; i++){
@@ -325,7 +384,7 @@ export default function Renderer(props){
 				alert(server.getRes(resOrder));
 				return;
 			}
-			updateUserOrders(orderUserToken, document.getElementById('userOrdersBox')); 
+			updateUserOrders(orderUserToken, document.getElementById('rdUserOrdersBox')); 
 
 		});
 		calcBox.appendChild(orderBut);
@@ -333,7 +392,7 @@ export default function Renderer(props){
 
 	this.showUserOrders = function(){
 		let userOrdersBox = document.createElement('div');
-		userOrdersBox.id = 'userOrdersBox';
+		userOrdersBox.id = 'rdUserOrdersBox';
 		userOrdersBox.innerHTML = '';
 		document.getElementsByTagName('body')[0].appendChild(userOrdersBox);
 	}
